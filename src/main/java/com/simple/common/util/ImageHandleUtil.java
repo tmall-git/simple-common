@@ -3,14 +3,14 @@ package com.simple.common.util;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 
 /**
  *
@@ -20,7 +20,8 @@ import org.apache.commons.logging.LogFactory;
 public class ImageHandleUtil {
 
 	private static final Log logger = LogFactory.getLog(ImageHandleUtil.class);
-	
+	private static final int BUFFER_SIZE = 16 * 1024 ;
+	private static final String ROOT_PATH = "/image";
 	
 	private static BufferedImage toImage(File f) {
 		try {
@@ -58,6 +59,30 @@ public class ImageHandleUtil {
 	}
 	
 	
+	/**
+	 * 穿过来base64位编码格式的图片内容
+	 * @param base64
+	 * @param path
+	 * @param imgName
+	 */
+	public static String decodeBase64ToImage(String base64, String desFile) {
+		File file = new File(ROOT_PATH+desFile);
+		if (!file.exists()) {
+			file.mkdirs();
+		}
+		sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
+	    try {
+	      FileOutputStream write = new FileOutputStream(file);
+	      byte[] decoderBytes = decoder.decodeBuffer(base64);
+	      write.write(decoderBytes);
+	      write.close();
+	      return ROOT_PATH+desFile;
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+	    return null ;
+	}	
+	
 	
 	/**
 	 * 
@@ -65,7 +90,7 @@ public class ImageHandleUtil {
 	 * @param imgOutputStream
 	 * @param level
 	 */
-	public static void scaleImage(InputStream imgInputStream, OutputStream imgOutputStream, int limit) {
+//	public static void scaleImage(InputStream imgInputStream, OutputStream imgOutputStream, int limit) {
 //		try {
 //			float per = 0.7f;
 //			Image src = javax.imageio.ImageIO.read(imgInputStream);
@@ -152,5 +177,5 @@ public class ImageHandleUtil {
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
-	}
+//	}
 }
