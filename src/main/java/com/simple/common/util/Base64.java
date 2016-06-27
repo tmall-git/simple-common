@@ -1,5 +1,6 @@
 package com.simple.common.util;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import sun.misc.BASE64Decoder;
@@ -40,5 +41,15 @@ public class Base64 {
         }  
         return result;  
     }  
+    
+    public static byte[] decodeBytes(String s) {
+    	BASE64Decoder decoder = new BASE64Decoder(); 
+    	try {
+			return decoder.decodeBuffer(s);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+    }
     
 }

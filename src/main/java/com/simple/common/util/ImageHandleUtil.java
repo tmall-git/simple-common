@@ -1,10 +1,15 @@
 package com.simple.common.util;
 
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -83,6 +88,37 @@ public class ImageHandleUtil {
 	    return null ;
 	}	
 	
+	public static String uploadFile(String data,String desFile) {
+	        try {  
+	        	File file = new File(desFile);
+	        	if (!file.exists()) {
+	        		file.mkdirs();
+	        	}
+	        	//注意点：实际的图片数据是从 data:image/jpeg;base64, 后开始的  
+	            byte[] k =  Base64.decodeBytes(data.substring("data:image/jpeg;base64,".length()));  
+	            InputStream is = new ByteArrayInputStream(k);  
+	            String fileName = UUID.randomUUID().toString();  
+	            //String imgFilePath = serverPath + "\\static\\usertemp\\" + fileName + ".jpg";  
+	            //以下其实可以忽略，将图片压缩处理了一下，可以小一点  
+	            double ratio = 1.0;  
+	            BufferedImage image = ImageIO.read(is);  
+	            int newWidth = (int) (image.getWidth() * ratio);  
+	            int newHeight = (int) (image.getHeight() * ratio);  
+	            Image newimage = image.getScaledInstance(newWidth, newHeight,  
+	            Image.SCALE_SMOOTH);  
+	            BufferedImage tag = new BufferedImage(newWidth, newHeight,  
+	                    BufferedImage.TYPE_INT_RGB);  
+	            Graphics g = tag.getGraphics();  
+	            g.drawImage(newimage, 0, 0, null);  
+	            g.dispose();  
+	            String suffix = file.getName().substring(file.getName().lastIndexOf(".")+1);
+	            ImageIO.write(tag, suffix, new File(desFile));  
+	            return fileName;  
+	        }catch(Exception e) {
+	        	e.printStackTrace();
+	        }
+	        return null;
+	}
 	
 	/**
 	 * 
