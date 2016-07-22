@@ -52,11 +52,16 @@ public class DateUtil {
 		return date2AllString(cd.getTime());
 	}
 	
+	public static int getNowMonth() {
+		Calendar cd = Calendar.getInstance();
+		return cd.get(Calendar.MONTH)+1;
+	}
 	
 	public static void main(String[] args) {
 		System.out.println(getNowWeekBegin());
 		System.out.println(getNowWeekEnd());
 		System.out.println(getNowMonthBegin());
 		System.out.println(getNowMonthEnd());
+		System.out.println(getNowMonth());
 	}
 }
