@@ -1,11 +1,8 @@
 package com.simple.common.util;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-
 public class DateUtil {
 	public static String date2String(Date date) {
 		return new SimpleDateFormat("yyyy-MM-dd").format(date);
@@ -14,7 +11,9 @@ public class DateUtil {
 	public static String date2AllString(Date date) {
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 	}
-	
+	public static String date2StringWhitNoSpilt(Date date) {
+		return new SimpleDateFormat("yyyyMMddHHmmssSSS").format(date);
+	}
 	public static String getNowWeekBegin() {
 		Calendar cd = Calendar.getInstance();
 		cd.set(Calendar.DAY_OF_WEEK, 2);

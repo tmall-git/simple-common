@@ -3,10 +3,14 @@ package com.simple.common.util;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.util.StringUtils;
 
 public class PrimaryKeyUtil {
 	
 	private final static String STATIC_STR = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	private static AtomicInteger sequence = new AtomicInteger();
 	/**
 	 * 获得一个UUID
 	 * @return String UUID
@@ -42,6 +46,16 @@ public class PrimaryKeyUtil {
 		String time = System.currentTimeMillis()+"";
 		randomStr += "-" + time.substring(time.length()-4);
 		return randomStr;
+	}
+	
+	public static String getId() {
+		//读取环境变量配置 ，在web服务器中配置机器编号
+		String machine = System.getProperty("SIMPLE_MACHINE_SEQUENCE");
+		if (StringUtils.isEmpty(machine)) {
+			machine = "NAN";
+		}
+		int no = sequence.incrementAndGet();
+		return DateUtil.date2StringWhitNoSpilt(new Date())+machine+no;
 	}
 
 }
