@@ -56,11 +56,32 @@ public class DateUtil {
 		return cd.get(Calendar.MONTH)+1;
 	}
 	
+	public static Date getNewDateBySeconds(Date date,int seconds) {
+		if (seconds > 0 ) {
+			return new Date(date.getTime() + Math.abs(seconds) * 1000);
+		}else {
+			return new Date(date.getTime() - Math.abs(seconds) * 1000);
+		}
+	}
+	
+	public static Date getNewDateByMinutes(Date date,int minutes) {
+		return getNewDateBySeconds(date,60*minutes);
+	}
+	
+	public static Date getNewDateByHours(Date date,int hours) {
+		return getNewDateBySeconds(date,60*60*hours);
+	}
+	
+	public static Date getNewDateByDays(Date date,int days) {
+		return getNewDateBySeconds(date,24*60*60*days);
+	}
+	
 	public static void main(String[] args) {
 		System.out.println(getNowWeekBegin());
 		System.out.println(getNowWeekEnd());
 		System.out.println(getNowMonthBegin());
 		System.out.println(getNowMonthEnd());
 		System.out.println(getNowMonth());
+		System.out.println(getNewDateByDays(new Date(),1));
 	}
 }
