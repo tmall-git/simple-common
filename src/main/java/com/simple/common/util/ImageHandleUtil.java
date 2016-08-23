@@ -8,16 +8,22 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
 import com.sun.imageio.plugins.jpeg.*;
@@ -133,7 +139,12 @@ public class ImageHandleUtil {
 	public static void main(String[] args) {
 		//img_change("D:\\","3.png");
 		File f = new File("D:\\3.png");
-		img_change(f,50);
+		//img_change(f,50);
+		try {
+			cutImage(f, 100);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void img_change(File file,int with) {
@@ -301,5 +312,76 @@ public class ImageHandleUtil {
 	        ios.close();
 	        imageWriter.dispose();
 	      
+	    }
+	    
+	    
+	    /**
+	     * <p>Title: cutImage</p>
+	     * <p>Description:  根据原图与裁切size截取局部图片</p>
+	     * @param srcImg    源图片
+	     * @param output    图片输出流
+	     * @param rect        需要截取部分的坐标和大小
+	     */
+	    private static void cutImage(File srcImg, OutputStream output, java.awt.Rectangle rect){
+	        if(srcImg.exists()){
+	            java.io.FileInputStream fis = null;
+	            ImageInputStream iis = null;
+	            try {
+	                fis = new FileInputStream(srcImg);
+	                // ImageIO 支持的图片类型 : [BMP, bmp, jpg, JPG, wbmp, jpeg, png, PNG, JPEG, WBMP, GIF, gif]
+	                String types = Arrays.toString(ImageIO.getReaderFormatNames()).replace("]", ",");
+	                String suffix = null;
+	                // 获取图片后缀
+	                if(srcImg.getName().indexOf(".") > -1) {
+	                    suffix = srcImg.getName().substring(srcImg.getName().lastIndexOf(".") + 1);
+	                }// 类型和图片后缀全部小写，然后判断后缀是否合法
+	                if(suffix == null || types.toLowerCase().indexOf(suffix.toLowerCase()+",") < 0){
+	                	logger.error("Sorry, the image suffix is illegal. the standard image suffix is {}." + types);
+	                    return ;
+	                }
+	                // 将FileInputStream 转换为ImageInputStream
+	                iis = ImageIO.createImageInputStream(fis);
+	                // 根据图片类型获取该种类型的ImageReader
+	                ImageReader reader = ImageIO.getImageReadersBySuffix(suffix).next();
+	                reader.setInput(iis,true);
+	                ImageReadParam param = reader.getDefaultReadParam();
+	                param.setSourceRegion(rect);
+	                BufferedImage bi = reader.read(0, param);
+	                ImageIO.write(bi, suffix, output);
+	            } catch (FileNotFoundException e) {
+	                e.printStackTrace();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            } finally {
+	                try {
+	                    if(fis != null) fis.close();
+	                    if(iis != null) iis.close();
+	                } catch (IOException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	        }else {
+	        	logger.warn("the src image is not exist.");
+	        }
+	    }
+	    
+	    private static void cutImage(File srcImg,int x, int y, int width) throws FileNotFoundException{
+	    	String desFile = getScaleFilePath(srcImg.getAbsolutePath(),width);
+	    	cutImage(srcImg, new java.io.FileOutputStream(desFile), new java.awt.Rectangle(x, y, width, width));
+	    }
+	    
+	    public static void cutImage(File file,int width) throws IOException {
+	    	Image src  =  javax.imageio.ImageIO.read(file);
+	    	int old_w = src.getWidth(null); //得到源图宽 
+            int old_h = src.getHeight(null);
+            int x = 0;
+            if (old_w > width ) {
+            	x = (old_w-width)/2;
+            }
+	    	int y = 0;
+	    	if (old_h > width ) {
+	    		y = (old_h-width)/2;
+            }
+	    	cutImage(file,x,y,width);
 	    }
 }
