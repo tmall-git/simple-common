@@ -16,16 +16,23 @@ public class DateUtil {
 	}
 	public static String getNowWeekBegin() {
 		Calendar cd = Calendar.getInstance();
-		cd.set(Calendar.DAY_OF_WEEK, 2);
+		setToFirstDay(cd);
+		//cd.add(Calendar.DATE, 1);
 		cd.set(Calendar.HOUR_OF_DAY, 0);
 		cd.set(Calendar.MINUTE, 0);
 		cd.set(Calendar.SECOND, 0);
 		return date2AllString(cd.getTime());
 	}
+	private static void setToFirstDay(Calendar calendar) {
+	        while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+	            calendar.add(Calendar.DATE, -1);
+	        }
+	}
 	
 	public static String getNowWeekEnd() {
 		Calendar cd = Calendar.getInstance();
-		cd.set(Calendar.DAY_OF_WEEK, 7);
+		setToFirstDay(cd);
+		cd.add(Calendar.DATE, 5);
 		cd.set(Calendar.DAY_OF_MONTH, cd.get(Calendar.DAY_OF_MONTH)+1);
 		cd.set(Calendar.HOUR_OF_DAY, 23);
 		cd.set(Calendar.MINUTE, 59);
