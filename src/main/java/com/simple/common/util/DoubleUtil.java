@@ -22,4 +22,8 @@ public class DoubleUtil {
 		BigDecimal bg = new BigDecimal(value);
         return bg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
+	
+	public static void main(String[] args) {
+		System.out.println(formatDouble(0.01));
+	}
 }
