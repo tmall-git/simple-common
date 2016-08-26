@@ -138,7 +138,7 @@ public class ImageHandleUtil {
 	
 	public static void main(String[] args) {
 		//img_change("D:\\","3.png");
-		File f = new File("D:\\3.png");
+		File f = new File("D:\\t1.jpg");
 		//img_change(f,50);
 		try {
 			cutImage(f, 100);
@@ -365,23 +365,35 @@ public class ImageHandleUtil {
 	        }
 	    }
 	    
-	    private static void cutImage(File srcImg,int x, int y, int width) throws FileNotFoundException{
+	    private static void cutImage(File srcImg,int x, int y, int realwidth,int width) throws FileNotFoundException{
 	    	String desFile = getScaleFilePath(srcImg.getAbsolutePath(),width);
-	    	cutImage(srcImg, new java.io.FileOutputStream(desFile), new java.awt.Rectangle(x, y, width, width));
+	    	cutImage(srcImg, new java.io.FileOutputStream(desFile), new java.awt.Rectangle(x, y, realwidth, realwidth));
 	    }
 	    
 	    public static void cutImage(File file,int width) throws IOException {
 	    	Image src  =  javax.imageio.ImageIO.read(file);
-	    	int old_w = src.getWidth(null); //得到源图宽 
+	    	int old_w = src.getWidth(null); //得到源图宽
             int old_h = src.getHeight(null);
             int x = 0;
+            int y = 0 ;
+            int realwidth = width;
+            //以原图的宽高短的那边做正方形
+            if (old_w>old_h) {
+            	x = (old_w-old_h)/2;
+            	realwidth = old_h;
+            }else {
+            	realwidth = old_w;
+            	y = (old_h-old_w)/2;
+            }
+            
+            /**
             if (old_w > width ) {
             	x = (old_w-width)/2;
             }
 	    	int y = 0;
 	    	if (old_h > width ) {
 	    		y = (old_h-width)/2;
-            }
-	    	cutImage(file,x,y,width);
+            }*/
+	    	cutImage(file,x,y,realwidth,width);
 	    }
 }
