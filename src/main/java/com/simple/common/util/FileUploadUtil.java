@@ -63,7 +63,7 @@ public class FileUploadUtil {
 		}
 	}
 	
-	private static File getFileByInputStream(InputStream is,String subfix,String folder) {
+	public static File getFileByInputStream(InputStream is,String subfix,String folder) {
 			try {
 				String filefloder = folder+System.currentTimeMillis();
 				File f = new File(filefloder);
@@ -103,4 +103,8 @@ public class FileUploadUtil {
 		return null;
 	}
 	
+	public static void main(String[] args) {
+		String p = "D:\\1477625431\\788900.html";
+		System.out.println(p.substring(0,p.lastIndexOf(".")));
+	}
 }
