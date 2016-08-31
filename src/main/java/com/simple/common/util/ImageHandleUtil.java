@@ -30,6 +30,7 @@ import com.sun.imageio.plugins.jpeg.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 
@@ -166,7 +167,7 @@ public class ImageHandleUtil {
 	}
 	
 	public static String img_change(File file,String suffix,boolean isAbsolute,boolean isBackWhite) {
-		return tosmallerpic(file,suffix, 1024, 1024, (float)0.3,isAbsolute,isBackWhite);
+		return tosmallerpic(file,suffix, 1920, 1080, (float)0.3,isAbsolute,isBackWhite);
 	}
 	
 	/**
@@ -220,7 +221,10 @@ public class ImageHandleUtil {
              if (!f.exists()) {
 				f.mkdirs();
              }
-             String img_midname  =  file.getAbsolutePath().substring(0,file.getAbsolutePath().lastIndexOf("."))+"_"+suffix+"."+file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf(".")+1);
+             String img_midname  = file.getAbsolutePath();
+             if (!StringUtils.isEmpty(suffix)) {
+            	 img_midname  =  file.getAbsolutePath().substring(0,file.getAbsolutePath().lastIndexOf("."))+"_"+suffix+"."+file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf(".")+1);
+             }
              FileOutputStream fos = new FileOutputStream(img_midname); 
              saveAsJPEG(100, image_to_save, per, fos);
              fos.close(); 
