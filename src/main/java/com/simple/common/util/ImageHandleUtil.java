@@ -138,10 +138,10 @@ public class ImageHandleUtil {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		File f = new File("D:\\03.jpg");
-		String whiteFile = img_change(f,"white",true,true);
-		img_change(f,"black",false,false);
-		cutImage(new File(whiteFile), 500);
+		File f = new File("D:\\123.jpg");
+		img_change(f,"b",false,false);
+		String whiteFile = img_change(f,"w",false,true);
+		cutImage(new File(whiteFile), 220);
 		//img_change("D:\\","2.jpg");
 //		File f = new File("D:\\t1.jpg");
 //		//img_change(f,50);
@@ -213,7 +213,9 @@ public class ImageHandleUtil {
 			}
 			
 			//图片跟据长宽留白，成一个正方形图。 
-			 src = srcBufferedImage(src,old_w,old_h,needsWhite,needsWhite);
+			 if (needsWhite) {
+				 src = srcBufferedImage(src,old_w,old_h,needsWhite,needsWhite);
+			 }
 	         BufferedImage image_to_save  =  new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_RGB);        
              image_to_save.getGraphics().drawImage(src.getScaledInstance(new_w, new_h,  Image.SCALE_SMOOTH), 0,0,null); 
              String folder = file.getAbsolutePath().substring(0,file.getAbsolutePath().lastIndexOf(File.separator));
@@ -375,7 +377,8 @@ public class ImageHandleUtil {
 	                // 将FileInputStream 转换为ImageInputStream
 	                iis = ImageIO.createImageInputStream(fis);
 	                // 根据图片类型获取该种类型的ImageReader
-	                ImageReader reader = ImageIO.getImageReadersBySuffix(suffix).next();
+	                //ImageReader reader = ImageIO.getImageReadersBySuffix(suffix).next();
+	                ImageReader reader = ImageIO.getImageReadersBySuffix("jpg").next();
 	                reader.setInput(iis,true);
 	                ImageReadParam param = reader.getDefaultReadParam();
 	                param.setSourceRegion(rect);
