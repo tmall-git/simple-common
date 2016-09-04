@@ -1,9 +1,11 @@
 package com.simple.common.util;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -26,12 +28,18 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
-import com.sun.imageio.plugins.jpeg.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
+
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.imaging.jpeg.JpegProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifDirectory;
+import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
 
 
 /**
@@ -137,8 +145,8 @@ public class ImageHandleUtil {
 	        return null;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		File f = new File("D:\\123.jpg");
+	public static void main(String[] args) throws Exception {
+		File f = new File("D:\\2.jpg");
 		img_change(f,"b",false,false);
 		String whiteFile = img_change(f,"w",false,true);
 		cutImage(new File(whiteFile), 220);
@@ -160,13 +168,13 @@ public class ImageHandleUtil {
 		return oriFilePath;
 	}
 	
-	private static void img_change(String url,String name) {
+	private static void img_change(String url,String name) throws Exception {
 		tosmallerpic(new File(url+name),"middle",1024, 1024, (float)0.3,false,false);
 		//tosmallerpic(new File(url+name), "_small", 45, 45, (float)0.7);
 		//tosmallerpic(new File(url+name), "_smaller", 116, 100, (float)0.7);
 	}
 	
-	public static String img_change(File file,String suffix,boolean isAbsolute,boolean isBackWhite) {
+	public static String img_change(File file,String suffix,boolean isAbsolute,boolean isBackWhite) throws Exception {
 		return tosmallerpic(file,suffix, 1920, 1080, (float)0.3,isAbsolute,isBackWhite);
 	}
 	
@@ -181,6 +189,7 @@ public class ImageHandleUtil {
 	 * @param per
 	 * @param isAbsolute 是否绝对,严格按照宽高来处理，如果不是绝对，则按照压缩比来处理，
 	 * @param needsWhite 是否白色背景
+	 * @param angel 旋转90
 	 */
 	private static String tosmallerpic(File file,String suffix,int w,int h,float per,boolean isAbsolute,boolean needsWhite) {
 		Image src; 
@@ -216,8 +225,21 @@ public class ImageHandleUtil {
 			 if (needsWhite) {
 				 src = srcBufferedImage(src,old_w,old_h,needsWhite,needsWhite);
 			 }
-	         BufferedImage image_to_save  =  new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_RGB);        
-             image_to_save.getGraphics().drawImage(src.getScaledInstance(new_w, new_h,  Image.SCALE_SMOOTH), 0,0,null); 
+			 BufferedImage image_to_save =  new BufferedImage(new_w,new_h,BufferedImage.TYPE_INT_RGB); 
+			 //旋转角度,并且宽度要小于高度
+			 int angel = getRotateAngleForPhoto(file);
+			 if (angel>0) {
+				 Rectangle rect_des = CalcRotatedSize(new Rectangle(new Dimension(old_h,old_w)), angel);
+				 BufferedImage source = new BufferedImage(rect_des.width, rect_des.height,BufferedImage.TYPE_INT_RGB);  
+				 Graphics2D g2 = source.createGraphics(); 
+				 g2.translate((rect_des.width - old_w) / 2, (rect_des.height - old_h) / 2);  
+				 g2.rotate(Math.toRadians(angel), old_w / 2, old_h / 2);  
+				 g2.drawImage(src, null, null);  
+				 image_to_save.getGraphics().drawImage(source.getScaledInstance(new_w, new_h,  Image.SCALE_SMOOTH), 0,0,null); 
+			 }else {
+	             image_to_save.getGraphics().drawImage(src.getScaledInstance(new_w, new_h,  Image.SCALE_SMOOTH), 0,0,null); 
+			 }
+	           
              String folder = file.getAbsolutePath().substring(0,file.getAbsolutePath().lastIndexOf(File.separator));
              File f = new File(folder);
              if (!f.exists()) {
@@ -235,6 +257,68 @@ public class ImageHandleUtil {
 			 e.printStackTrace();
 		}
 		return null;
+	}
+	
+	
+	/**
+	 * 图片翻转时，计算图片翻转到正常显示需旋转角度 
+	 */
+	private static int getRotateAngleForPhoto(File file){
+		int angel = 0;
+		Metadata metadata;
+		try{
+			metadata = JpegMetadataReader.readMetadata(file);
+			Directory directory = metadata.getDirectory(ExifDirectory.class);
+			if(directory.containsTag(ExifDirectory.TAG_ORIENTATION)){ 
+				// Exif信息中方向　　
+				int orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION); 
+				// 原图片的方向信息
+				if(6 == orientation ){
+					//6旋转90
+					angel = 90;
+				}else if( 3 == orientation){
+				   //3旋转180
+					angel = 180;
+				}else if( 8 == orientation){
+				   //8旋转90
+					angel = 270;
+				}
+			}
+		} catch(JpegProcessingException e){
+			e.printStackTrace();
+		} catch(MetadataException e){
+			e.printStackTrace();
+		}
+		logger.info("图片旋转角度：" + angel);
+		return angel;
+	}
+	/**
+	* 计算旋转参数
+	*/
+	private static Rectangle CalcRotatedSize(Rectangle src,int angel){
+		// if angel is greater than 90 degree,we need to do some conversion.
+		if(angel > 90){
+			if(angel / 9%2 ==1){
+				int temp = src.height;
+				src.height = src.width;
+				src.width = temp;
+			}
+			angel = angel % 90;
+		}
+		
+		double r = Math.sqrt(src.height * src.height + src.width * src.width ) / 2 ;
+		double len = 2 * Math.sin(Math.toRadians(angel) / 2) * r;
+		double angel_alpha = (Math.PI - Math.toRadians(angel)) / 2;  
+		double angel_dalta_width = Math.atan((double) src.height / src.width);  
+		double angel_dalta_height = Math.atan((double) src.width / src.height);  
+
+		int len_dalta_width = (int) (len * Math.cos(Math.PI - angel_alpha  
+				- angel_dalta_width));  
+		int len_dalta_height = (int) (len * Math.cos(Math.PI - angel_alpha  
+				- angel_dalta_height));  
+		int des_width = src.width + len_dalta_width * 2;  
+		int des_height = src.height + len_dalta_height * 2;  
+		return new java.awt.Rectangle(new Dimension(des_width, des_height));  
 	}
 	
 	private static BufferedImage srcBufferedImage(Image src,int old_w,int old_h,boolean isSquare,boolean needsWhite) {
