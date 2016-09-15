@@ -147,9 +147,13 @@ public class ImageHandleUtil {
 	
 	public static void main(String[] args) throws Exception {
 		File f = new File("D:\\2.jpg");
+		long timestart = System.currentTimeMillis();
 		img_change(f,"b",false,false);
+		System.out.println(System.currentTimeMillis()-timestart);
 		String whiteFile = img_change(f,"w",false,true);
+		System.out.println(System.currentTimeMillis()-timestart);
 		cutImage(new File(whiteFile), 220);
+		System.out.println(System.currentTimeMillis()-timestart);
 		//img_change("D:\\","2.jpg");
 //		File f = new File("D:\\t1.jpg");
 //		//img_change(f,50);
