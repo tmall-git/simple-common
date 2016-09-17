@@ -18,9 +18,9 @@ public class Thumbnailator {
 
 	public static void main(String[] args) {
 		try {
-			File f = new File("D:\\2_1.png");
-			scale(new FileInputStream(f),300,400,0.1f,0,"D:\\2_1_1_s.jpg");
-			scale("D:\\2_1_1.jpg",220,220,0.1f,0,"D:\\2_1_1_220.jpg");
+			File f = new File("D:\\1.JPG");
+			cutSquareImage(f,220,220,0.1f,0,"D:\\1_1_1_220.jpg");
+			//scale("D:\\2_1_1.jpg",220,220,0.1f,0,"D:\\2_1_1_220.jpg");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,6 +137,34 @@ public class Thumbnailator {
 				.outputQuality(0.8f).toFile("C:/image_watermark_center.jpg");
 	}
 
+	
+	public static void cutSquareImage(File file,int width,int height,double rate,double rotate, String desFile) throws IOException {
+		BufferedImage image = ImageIO.read(file);  
+		Builder<BufferedImage> builder = null;  
+		  
+		int imageWidth = image.getWidth();  
+		int imageHeitht = image.getHeight();  
+		
+		
+		//压缩至指定图片尺寸（例如：横400高300），保持图片不变形，多余部分裁剪掉(这个是引的网友的代码)  		
+		if ((float)width / height != (float)imageWidth / imageHeitht) {  
+		    if (imageWidth > imageHeitht) {  
+		        image = Thumbnails.of(file).height(height).asBufferedImage();  
+		    } else {  
+		        image = Thumbnails.of(file).width(width).asBufferedImage();  
+		    }  
+		    builder = Thumbnails.of(image).sourceRegion(Positions.CENTER, width, height).size(width, height);  
+		} else {  
+		    builder = Thumbnails.of(image).size(width, height);  
+		}  
+		if (rate > 0 ) {
+			builder = builder.outputQuality(rate);
+		}
+		if (rotate != 0 ) {
+			builder = builder.rotate(rotate);
+		}
+		builder.outputFormat("jpg").toFile(desFile); 
+	}
 	
 	/**
 	 * 裁剪
